@@ -24,3 +24,16 @@ Listings (static/dimension — property and host attributes)
 Neighbourhoods (static/dimension — geographic reference data)
 Calendar (fact — date-level price and availability; a point-in-time snapshot, not genuinely incremental — booked vs host-blocked nights are indistinguishable per Inside Airbnb's own documentation)
 Reviews (fact — genuinely incremental, date-stamped; used for monthly year-month batches, e.g. 2021-01, 2021-02)
+
+
+# Setting up a Microsoft Fabric environment
+
+1. Create a resource group in Azure
+2. setting up a Microsoft Fabric Resource in Azure
+3. Create a Azure Data Lake Storage Account
+4. Create Azure Synapse Analytics Service
+5. Create new Spark Pool in Azure Synapse Analytics Service
+
+# Create Azure Synapse Analytics Service in Azure
+to create this, Resource group -
+
