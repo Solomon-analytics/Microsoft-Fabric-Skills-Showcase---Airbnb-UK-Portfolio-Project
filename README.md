@@ -37,3 +37,65 @@ Reviews (fact — genuinely incremental, date-stamped; used for monthly year-mon
 # Create Azure Synapse Analytics Service in Azure
 to create this, Resource group -
 
+
+# Microsoft Fabric Data Factory
+
+-- Data Gateways
+There are two types:
+- 1. On-premise Data Gateway: provides quick and secure data transfer between on-premise data and several Microsoft cloud services, such as Power BI, PowerApps
+  2. V-Net Data Gateway: A virtual network data gateway helps to connect from Microsoft cloud services to Azure data services within a virtual network.
+ 
+  -- Installing Data Gateway
+  In Microsoft Fabric homepage, clock on the download icon - Data Gateway - Download standard mode - download and install - sign in with your Microsoft fabric username - register a new gateway name - input recovery keys
+  - to ensure it's running/ready, go to microsoft fabric - settings - manage connections and gateways - on-premises data gateways - status should show online
+ 
+-- Creating connections to SQL Serve
+connections is away of establishing authentication to data sources like linked services ion Azure Data Factory / Synap se Analytics
+
+there are three connections types
+on-premises
+v-net
+cloud
+
+- Establishing connection between Fabric SQL Analytics Endpoint and SSMS
+- In Fabric SQL Analytics Endpoint - Copy (Copy SQL connection string) - In SSMS - Connect (database engine) - Server name(input the copied string) - Authentciation(Microsoft entra password - Username(Microsoft fabric email and password)
+
+- - Creating connection: in microsoft fabirc - manage connections and gateways - connections - create new connection - choose on-premises - gateaway cluster name(choose the created gateway) - connecion name(give it a name) - connection type(SQL Server) - server(copy SSMS server name and paste) -- database -- authentication method (basic) - input the username and password of SQL serve --
+ 
+-- Pipeline to ingest onprem SQL data to lakehouse
+On fabric portal - workspace - new item - data pipeline - lookuup activity - choose commectoon(onpremsql connection) - connection type(SQL server) - choose database - query( SELECT schema_name(t.schema_id) AS schema_name, t.name as table_name FROM sys.tables t ORDER BY table_name) - activity(foreach) - sequential(yes) - items (@activity('lookup1').output.value) - inside for each - copy activity - source(onpremsqlconnecion) - connection type(sql server) - select database - table - schema name(@item().schema_name - table_name(@item().table_name) -- these are parameters - input the parameter for schema_name and table_name - destination - LH_fabric(fabirc is the destination) - tables(@item().table_name--this is a dynamic content param) - action(append) - save and run
+
+
+# Creating Dataflow Gen2
+in workspace - net item - dataflow gen2 - read data from ADLS - On ADLS - getting access to ADLS storage account - Access control IAM - Add - add role assignment - role(sotorage blob data contributor) -  select and add member - review + assign - back in fabric portal - dataflow gen 2 - get data (more) - ADLS - URL(Storage account- file-properties-copy url) - paste - change blob to dfs - remove the file name - organizational account - privacy level(public) -combine or create - perform the transformation - write data to destination(add data destination(conect to lakehouse - choose existing lakehouse) - give it a name and save in the lakehouse
+
+# Fabric Onelake
+Loading file into Onelake using shortcut
+Shortcut: typically operates at the Onelake level: are objects in Onelake that point to other storage location
+Benefits:
+when data in source is update - updates reflects in the target path
+data is accessed virtually without copying
+
+
+- prerequisites to create shortcuts
+shortcuts can be created in lakehouse tables or files
+what is required to create shortcut
+1. source location is needed (Lakehouse, Warehouse, Azure datalake, Amazon s3, dataverse, GCP)
+2. right authentication to the data source
+3. Destination(Lakehouse or KQL Database)
+
+Creating shortcut in files of lakehouse
+source: ADLS - container - subfolder - files - ensure fabric user do have the storage blob data contributor role
+Create new container in existing storage ADLS - create a directory - upload files in this directory - give the fabric user access to this storege - through accss control (IAM) - blob storage data contributor
+fabric portal - lakehouse - on files- three dots - new shortcut - source(ADLS) - url(in adls, copy the url of any of the file, replace blob with adls, remove file name.itsformat at the end) - paste - organizaational accunt - click on ADLS cntainer and next - 
+
+-- criteria to create shortcut in lakehouse table section
+Adls(container - subfolder - fils(role: Storage blob data contributor) - the steps are the same as files shortcut - likely to see this prompt(Unable to identify these objects as tables or views. To keep these objects in the lakehouse, move them to Files.) - typically, the table section of lakehouse, data are stored i this section  as delta parquet format, anyother format like csv, excel parquet or json should be stored under the folder section - 
+
+- right way to create a shortcut in table's section of the lakehouse
+- basaically - in azure synapse - notebook - read adls container dataset in its format - then write back to adls container in delta format - then create a table lakehouse shortcut - by accessing the delta format in adls container- ensure the azure synapse account is granted the blod data storege contributor access in adls
+- 
+- 
+
+
+
