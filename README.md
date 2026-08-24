@@ -136,6 +136,34 @@ if shortcut data in lakehouse is deleted, what effect does it have with data in 
 - when a shortcut file/table is deleted in Lakehouse - these files and tables remain present in Synapse analytics and ADLS, in other words, data is not deleted at the source level
 
 ## Fabric Synapse Data Engineering
+-- Spark in Microsoft Fabric:
+In microsoft fabric, each workspace is assigned a cluster, an admin can manage these settings in the spark cluster
+Workspace settings - data engineering/data science - spark settings 
+Pool: Starterpool - default pool - New notebook - workspace default(workspace settings(there you see the default spark pool)
+spark pool refers to compute environment which can run workloads. Can be categorised into two types
+starterpool - default pool, can initialise sessions within 5-10 seconds. Have spark clusters that are always running. Clusters are groups of machines which can run a workload. Only charged when in use
+starter pool configuration:
+Node family: memory optimised, node size: mdeium, min and max nodes 1-10, auto scale: No, dynamic allocation -On. sart pool has to be used within 20min, else, it get disconnected
+
+customising starter pool:
+workspace settings - date engineering/data science - spark settings - the only settings allowed to be adjusted is the Nodes and allocate executors
+
+-- custom spark pool:
+this is created based on project requirements and specification - cluster size based on customer specifications
+under what scenario is custom pool choosen?
+when there is a tight budget, this allows to create a small node slize
+creating a custom pool, workspace settings - data engineering/data science - spark pool - new pool - select node size(small) - enable auto scale(No) - Number of nodes (3) - save - notebook - workspcace default(should see the custom pool) - it took 2-3 minutes to initialise the spark session
+
+-- standard vs high concurrency sessions
+in the present notebook with the custom pool - create a new notebook -  initialise spark session in new cell(sc) - by default, both notebooks takes a standard session - the spark session takes aboiut 2-3 minutes to run. is there a better way if doing this? yes, we initialise the session in notebook 1 and share the session in notebook 2 using the high concurrency session - the main benefit is - since first notebook initialise the spark session and took 2-3 minituers, initialising in the second notebook takes around 15 second with the help of high conceurrency session
+in other to create a high cioncurrency session in notebook - stop the standard session - connect - new high concurrency session - in new cell (sc), session runs in 2min 40 seconds - back on the second notebook - stop - attach to high conceurrency session - in newcell (sc) and run , session runs in 2 seconds
+High conceurrency session is onky for sinkge user, can not benshared with multiple users
+what is the use case if using this: if ever there is a notebook and there is a requirement in the current notebook that refers to other notebook, you can have the session shared in the current notrebook with another notebok using the high concurrency session
+Benefit of high concurrency session:
+multi task?: one user can use multiple notebooks with one session. prevents delays due to session creation
+security: session shared is within a single user biundary
+cost-effective: better resource utilisation and cost-saving
+
 
 
  
