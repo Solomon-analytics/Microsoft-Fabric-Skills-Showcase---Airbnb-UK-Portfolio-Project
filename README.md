@@ -164,6 +164,32 @@ multi task?: one user can use multiple notebooks with one session. prevents dela
 security: session shared is within a single user biundary
 cost-effective: better resource utilisation and cost-saving
 
+-- MSSparkUtils:
+built-in package which helps to perform common tasks
+it can be used to work with file systems, to get environment variables, to chain notebooks together, and to work with secrets:
+mssparkutils.help() - this list all functions available
+Notebook Utils: Utility for notebook operations (e.g, chaining Fabric notebooks together)
+file system utils: utility for filesystem operations in Fabric
+Credential: utility for obtaining credentials (tokens and keys) for Fabric resources
+
+File system Utilities:
+mssparkutils.fs.help()
+Mounting: attaching a storage to a notebook
+- Mount an Azure Datalake
+- Mount a Lakehouse
+To mount, we need an external storage: ADLS
+``` from notebookutils import mssparkutils
+accountKey = "<storage access keys>"
+mssparkutils.fs.mount(
+            "abfss://mycontainer@<accountname>.dfs.core.windows.net",
+            "/test",
+            {"accountKey":accountKey}
+      ) ```
+reason why shirtcut is prefered in realtime project compared to mount: the function mounts becomes redundant when the spark session stops
+To list the file in a storage using mount:
+mssparkutils.fs.ls(f"file://{mssparkutils.fs.getMountPath('/pracMount')}/"):--> practMount us the MountPoint 
+
+-- Other Utils
 
 
  
