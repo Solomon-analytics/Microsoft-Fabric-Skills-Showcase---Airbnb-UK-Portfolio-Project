@@ -94,8 +94,52 @@ Adls(container - subfolder - fils(role: Storage blob data contributor) - the ste
 
 - right way to create a shortcut in table's section of the lakehouse
 - basaically - in azure synapse - notebook - read adls container dataset in its format - then write back to adls container in delta format - then create a table lakehouse shortcut - by accessing the delta format in adls container- ensure the azure synapse account is granted the blod data storege contributor access in adls
-- 
-- 
+  
+-- Creating a shortcut with delta in a subfolder
+in Adls create a new container in storage - in Synapse Analytics - start the spark pool - read file from ADLS - then write to ADLS subfolder created in delta format - in microsoft fabric - in tablle - create shortcut - copy the parquet url in ADLS, renamed blob to dfs, remove the file name - once again this returns an error(unable to identify these objects as tables. To keep these objects in the lakehouse, move them to files. Shortcutes cannot be moved directly, but you can recreatre them in file and then delete them here) - why this error? considering the file has processed from synapse analytics and its format us un delta? - not entirely sure, i think this is because we are also bring in the file/container, rather than just the delta file??
+
+-- Creating shortcut with only parquet format?
+create a new container in ADLS storage and store file as parquet(to do this, read csv data from adls using synapse analytics and write back to the new container/folder as parquet format) - in microsoft fabric - lakehouse - in the table section - new shortcut - copy the parquet file existing in the newly created container/folder, copy the url - replace blob with dfs - once again, this went to the unidentified state with the same error as above
+In conclusion, best practice is to create a short for files in Delta Parquet in the table(managed) section of the lakehouse, whil;e files such as csv, parquet, json, excel - shortcuts shpuld be created for this in the files section of the lakehouse
+
+-- Requirements to create shortcuts in table and files section
+Shortcuts in table:
+in the table folder, you can only create shortcuts at the top level. Shortcuts are not supported in other subdirectories of the tables folders - in other words, short must be created in the table section as a delta format not in a subfolder in the table as any format be it in delta format
+Data to be in Delta/parquet frmat so that lakehouse automatically synchronise the metadata and recognises the folder as a table
+
+Shortcuts in files:
+if your shortcut location is in form of sub-directories, go with storing them in files.
+if they are not in delta-parquet format, store them in files
+
+- Shortcut updating scenario:
+To update file that was created as shirtcut in lakehouse from ADLS?
+First, we need to grant an updating access on Azure - resource group - AFLS storage - Access control (IAM) - check access - input name of user - storage blob data contributor(allows to read, write and delete access to azure storage bloc container and data) - this user currently have all access to modify and delete data in the storage account - in the case a user/account does not have this access, you grant the acess as the admin or request admin to grant the access?
+In the lakehouse - New notebook - df = spark.sql("select * from LH_Fabric.shortcuttable") display(df))
+writing an update statement :  spark.sql("UPDATE LH_FABRIC.shortcuttable SET column_name = "value" WHERE column_name = "value)) - this will run sunncessfullly because user has a contributor access of the ADLS storage, if user had only read access or anythother access apart from admin, owner or contributor, it returns an error.
+to comfirm update: spark.sql("SELECT COUNT(*) FROM LH_FABRIC.shortcuttable WHERE column_name = "value")
+finally, update made on a shortcut file in the lakehouse layer would be reflected in the ADLS layer
+
+-- Updating scenario 2 Datalake to Lakehouse
+in synapse analytics - updating data in synapse analytics (df = spark.sql("select * from LH_Fabric.shortcuttable") - next(df.createorReplaceTempView('updateview') - Next(spark.sql("UPDATE updateview SET column_name = "value" WHERE column_name = "value)) - Next, (display(spark.sql("SELECT COUNT(*) FROM updateview WHERE column_name = "value"")) - back to fabric - confirm if changes made in synapse analytics was reflected in fabric lakehouse (display(spark.sql("SELECT COUNT(*) FROM LH_FABRIC.shortcuttable WHERE column_name = "value"")
+
+-- Shortcut deletion scenarios 1
+if shortcut data in lakehouse is deleted, what effect does it have with data in ADLS container? data present in the lakehouse through shortcut, when deleted in the lakehouse, it automatically deletes in the ADLS container
+
+- shortcut deleteion scenario 2: deleting specific content in ADLS container: what happens to the content present in Lakehouse? deleteing rows or columns from a data in ADLS, chages is reflected in Lakehouse, the same is applied as deleting the whole data file, the same is also applied in reverse
+
+- Shortcut scenario 3 - delete table data in Lakehouse: delete content in shortcut tables section: deleting rows, columns, or data table in lakehouse, this changes is reflected in synapse analytics or ADLS
+
+- Deletion Scenario 4 - Delete table data in ADLS: Dekete a specfic content of delta table in ADLS
+- delete a row in syanapse analytics - changes is reflected both in fabric and ADLS
+
+- Deletion Scenario 5: deleting entire shortcut in Lakehouse
+- when a shortcut file/table is deleted in Lakehouse - these files and tables remain present in Synapse analytics and ADLS, in other words, data is not deleted at the source level
+
+## Fabric Synapse Data Engineering
+
+
+ 
+
 
 
 
