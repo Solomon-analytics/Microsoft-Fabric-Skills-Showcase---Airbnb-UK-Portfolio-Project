@@ -192,8 +192,49 @@ mssparkutils.fs.ls(f"file://{mssparkutils.fs.getMountPath('/pracMount')}/"):--> 
 -- Other Utils
 
 
- 
 
+
+-- FS Utils - fastcp
+performant copy file
+faster way to copy files, especially large volume
+make use of the Azcopy
+
+-- Notebook Utils - Run exit
+this is bsiscally running a notebook from another notebook using the mssparkutils.notebook
+
+-- Mssparkutils - Notebook - RunMultiple
+Allows to run multiple notebooks concurrently with support for relationship dependency
+execute multiple notebooks simultaneously without waiting for each one to finish
+specific dependencies and order of execution using json
+can optimise the spark compute resources using this
+can view the snapshot of each notebook run record
+
+-- Ingest data from ADLS to Lakehouse
+Authentication methods from notebook:
+using microsoft entra id of user
+using service principal - can not be directly used in the notebook
+using service principal with key vault
+storage blob data contributor access must be granted to user
+
+-- Accessing ADLS using Service Principal
+storage blob data contributor access must be granted to the app name/user created
+setting this up: Microsoft Entra Id - App registrations - New Registation - give it a name - single tenant - register - this should be created in the principla/main azure account
+make note of the:
+application id, client id(directory tenant id) and the secret key : generate the secret key : manager - certificate and secrets - new client secret - give a description and select when it expires - copy the secret value
+in the tenant account, grant storate blob data contributor access to the app created in the principal account
+``` spark.conf.set(f"fs.azure.account.auth.type.{storageAccount}.dfs.core.windows.net", "OAuth")
+spark.conf.set(f"fs.azure.account.oauth.provider.type.{storageAccount}.dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
+spark.conf.set(f"fs.azure.account.oauth2.client.id.{storageAccount}.dfs.core.windows.net", Appid)
+spark.conf.set(f"fs.azure.account.oauth2.client.secret.{storageAccount}.dfs.core.windows.net", secretKey)
+spark.conf.set(f"fs.azure.account.oauth2.client.endpoint.{storageAccount}.dfs.core.windows.net", f"https://login.microsoftonline.com/{tenant_id}/oauth2/token") ```
+
+-- Access ADLS using Service Principal using Key vault
+Azure portal - in resource group - microsoft key vault - give a name - standard - select azure role based access control - review and create
+in the key vault - object - keys - not authorise to use this - reason being the right role needs to be assigned
+access control (IAM) - ADD role assignment - key vault secrets officer - select member(fabric user)
+generate secret and key
+secret: we generate three things: App id, tenant id and the secret key
+App id: give it a name, paste in the app id as value, repeat for the rest
 
 
 
